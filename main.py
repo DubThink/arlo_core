@@ -24,7 +24,7 @@ def meter(v):
 
 # outer loop runs to start vmu and run the main loop
 def sys_run(pp):
-	while True:
+	while not kill:
 		try:
 			print("Starting vmu...",end="")
 			vp=VMU931Parser(device=vmuaddr,euler=False,quaternion=True)
@@ -43,7 +43,7 @@ def sys_run(pp):
 def run_core(pp,vp):
 	ltime=time.time()
 	last_open_time=time.time()
-	while True: # run loop
+	while not kill: # run loop
 		try:
 		#	print("run 1")
 			packet=vp.parse()
@@ -64,13 +64,13 @@ def run_core(pp,vp):
 			if pp != None and pp.s.isOpen() and ltime+wait_time<time.time():
 				#print("open status:",pp.s.isOpen())
 				try:
-					refresh_cooldown= cycle(packet, vp)
+					refresh_cooldown= cycle(packet,pp, vp)
 					if(refresh_cooldown):
 						ltime=time.time()
 				except serial.serialutil.SerialException as e:
 					print("&&&&&&&&&&",e)
 					print("Propellor comms failed, attempting to restart... ")
-					while 1:
+					while not kill:
 						try:
 							print("Reconnecting to propellor...",end="")
 							pp.s.close()
@@ -81,6 +81,10 @@ def run_core(pp,vp):
 						else:
 							print("SUCCESS")
 							break
+	try:
+		pp.sendspeed(0,0)
+	except:
+		pass
 '''if not pp is None:
 					pp.s.close()
 				try:
@@ -95,7 +99,7 @@ def run_core(pp,vp):
 					ltime=time.time()
 					last_open_time=time.time()
 '''			
-def cycle(packet,vp):
+def cycle(packet,pp,vp):
 			if type(packet) is messages.Quaternion:
 				a=Quaternion(packet.w,packet.x,packet.y,packet.z)
 				vec=[0,0,1]*np.matrix(a.rotation_matrix)
@@ -113,20 +117,19 @@ def cycle(packet,vp):
 				return 0
 
 class _Loop(threading.Thread):
-	pp=None
 	def __init__(self):
 		super(_Loop,self).__init__()
 	def run(self):
 		while not kill:
 			print("Kill:",kill)
 			try:
-				self.pp=plink(hataddr)
+				pp=plink(hataddr)
 			except serial.serialutil.SerialException as e:
 				time.sleep(1)
 				print("No connection to propellor, retrying")
 			else:
 				print("Propellor connected")
-				sys_run(self.pp)
+				sys_run(pp)
 #			try:
 #				run(pp)
 #			except KeyboardInterrupt:
