@@ -1,0 +1,2 @@
+To restart the propellor when it's frozen because the motors were turned on before it, close the serial connection.
+It takes around 5 seconds to restart. (It beeps)
