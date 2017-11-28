@@ -107,7 +107,7 @@ def cycle(packet,pp,vp):
 				y=np.arcsin(vec.T[1])/1.6
 				z=np.arcsin(vec.T[2])/1.6
 #				print(meter(x),"        ",meter(y),"    ",meter(z),y)
-				if y>0:
+				if y>0 and movementEnabled:
 #					print(int(z*9),int(x*11))
 					pp.sendspeed(int(z*9),int(x*11))
 				else:
@@ -120,6 +120,7 @@ class _Loop(threading.Thread):
 	def __init__(self):
 		super(_Loop,self).__init__()
 	def run(self):
+		print("[_Loop] loop started")
 		while not kill:
 			print("Kill:",kill)
 			try:
@@ -130,6 +131,7 @@ class _Loop(threading.Thread):
 			else:
 				print("Propellor connected")
 				sys_run(pp)
+		print("[_Loop] loop exiting")
 #			try:
 #				run(pp)
 #			except KeyboardInterrupt:
@@ -143,10 +145,15 @@ class _Loop(threading.Thread):
 		print("Kill set to",kill)
 
 _theLoop=0
-
+movementEnabled=0
+def toggleMovement():
+	global movementEnabled
+	movementEnabled= not movementEnabled
+	return movementEnabled
 # Note: calling this when the loop is active will do nothing
 def startLoop():
 	global _theLoop
+	global kill
 	if _theLoop==0  or not _theLoop.is_alive():
 		print("[Core] starting loop")
 		kill=False
@@ -157,7 +164,8 @@ def stopLoop():
 	global kill
 	kill=True
 	print("[Core] killing loop...")
-	_theLoop.join()
+	if _theLoop!=0:
+		_theLoop.join()
 	print("[Core] loop stopped")
 
 def isLoopActive():

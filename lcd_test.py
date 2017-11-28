@@ -38,21 +38,35 @@ print('Press Ctrl-C to quit.')
 
 import main
 
+select_down_time=0
+
 while True:
 	# Loop through each button and check if it is pressed.
 	for button in buttons:
 		if lcd.is_pressed(button[0]) and not button[3]:
 			# Button is pressed, down
-			if button[0] is LCD.SELECT and not main.isLoopActive():
-				# select button
-				main.startLoop()
-				lcd.clear()
-				lcd.message("Starting")
-			elif button[0] is LCD.RIGHT:
-				lcd.clear()
-				lcd.message("Stopping...")
-				main.stopLoop()
-				lcd.set_cursor(0,1)
-				lcd.message("Stopped")
-#		save button state
+			if button[0] is LCD.SELECT:
+				select_down_time=time.time()
+				if not main.isLoopActive():
+					# select button
+					main.startLoop()
+					lcd.clear()
+					lcd.message("Starting")
+				else:
+					lcd.clear()
+					if not main.toggleMovement():
+						lcd.message("Disabled movement")
+					else:
+						lcd.message("Enabled movement")
+
+		# log current key state (end of loop)
 		button[3]= lcd.is_pressed(button[0])
+
+	if lcd.is_pressed(LCD.SELECT) and buttons[0][3]  and time.time()-select_down_time>5:
+		print("DEBUG down_time=",select_down_time)
+		lcd.clear()
+		lcd.message("Stopping...")
+		main.stopLoop()
+		lcd.set_cursor(0,1)
+		lcd.message("Stopped")
+#		save button state
