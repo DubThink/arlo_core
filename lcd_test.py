@@ -25,7 +25,7 @@ time.sleep(1.0)
 
 # Show button state.
 lcd.clear()
-lcd.message('Press buttons...')
+lcd.message('SELECT to start')
 
 # Make list of button value, text, and backlight color.
 buttons = [ [LCD.SELECT, 'Select', (1,1,1),False],
@@ -36,7 +36,9 @@ buttons = [ [LCD.SELECT, 'Select', (1,1,1),False],
 
 print('Press Ctrl-C to quit.')
 
+print('1.')
 import main
+print('2.')
 
 select_down_time=0
 
@@ -50,15 +52,21 @@ while True:
 				if not main.isLoopActive():
 					# select button
 					main.startLoop()
+					main.movementEnabled=0
 					lcd.clear()
-					lcd.message("Starting")
+					lcd.message("Started")
+					lcd.set_cursor(0,1)
+					lcd.message("SELECT: move on")
 				else:
 					lcd.clear()
 					if not main.toggleMovement():
 						lcd.message("Disabled movement")
+						lcd.set_cursor(0,1)
+						lcd.message("SELECT: toggle")
 					else:
 						lcd.message("Enabled movement")
-
+						lcd.set_cursor(0,1)
+						lcd.message("SELECT: toggle")
 		# log current key state (end of loop)
 		button[3]= lcd.is_pressed(button[0])
 

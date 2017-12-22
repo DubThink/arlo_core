@@ -1,2 +1,10 @@
 To restart the propellor when it's frozen because the motors were turned on before it, close the serial connection.
 It takes around 5 seconds to restart. (It beeps)
+
+The scripts are started at boot from the /etc/rc.local script
+
+pip packages installed (need to be installed as root so command works on startup):
+pyvmu, pyquaternion
+
+Other requirements:
+adafruit lcd library thing
